@@ -1,0 +1,140 @@
+<idea-plugin version="2">
+  <name>Gosu 3</name>
+  <description>
+    IntelliJ IDEA plug-in for the Gosu programming language.
+    Revision 1.0x
+
+    The plugin enables you to:
+    - Create Gosu classes, programs, etc.
+    - Edit Gosu with custom Syntax highlighting
+    - Launch Gosu programs directly via IJ run configurations
+    - Debug Gosu
+      > Step in, over, out, etc
+      > Add breakpoints
+      > Inspect stack frame
+      > Seamlessly step between Java and Gosu etc.
+    - Hyperlink to Gosu from stack traces
+
+
+    To run programs you need to either:
+    - have Gosu libraries somewhere in your project (all our apps do already), or
+    - define an environment variable for “gosu.home” pointing to your gosu dist directory, or
+    - define a cmd line param for ”gosu.home” e.g., -Dgosu.home=c:\mygosudist
+
+    Note the debugger works regardless of whether you launch a Gosu program or you launch a Java one or a junit test or whatever.
+
+
+    What’s not there yet?
+    - Code completion
+    - Code navigation
+    - Basically any feature that relies on type resolution or parsing
+    Someday we’ll provide those.
+
+
+    Known Issues
+    - Expressions in the debugger (in breakpoint conditions, watches, etc.) must be in Java (not Gosu)
+    - Some Gosu features are currently not well supported in the debugger stack frame e.g., closures
+  </description>
+  <version>1.04</version>
+  <vendor email="smckinney@guidewire.com" url="http://gosu-lang.org">Guidewire Software</vendor>
+  <idea-version since-build="8000"/>
+
+  <application-components>
+    <component>
+      <!--Gosu language support-->
+      <implementation-class>gw.plugin.ij.GosuLoader</implementation-class>
+    </component>
+  </application-components>
+
+  <project-components>
+  </project-components>
+
+  <actions>
+    <group id="Gosu.New">
+      <action id="Gosu.NewClass" class="gw.plugin.ij.actions.CreateClassAction"
+               text="Gosu Class" description="Create new Gosu class"/>
+<!--
+      <action id="Gosu.TestAction" class="gw.plugin.ij.actions.TestAction"
+               text="Test Action" description="Whatever you want"/>
+-->
+      <action id="Gosu.NewProgram" class="gw.plugin.ij.actions.CreateProgramAction"
+              text="Gosu Program" description="Create new Gosu program">
+      </action>
+
+<!--
+      <action id="Gosu.NewEnhancement" class="gw.plugin.ij.actions.CreateEnhancementAction"
+              text="Gosu Enhancement" description="Create new Gosu enhancement">
+      </action>
+-->
+      <separator/>
+      <add-to-group group-id="NewGroup" anchor="first"/>
+    </group>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!--syntax highlighter-->
+    <syntaxHighlighter key="Gosu Class" implementationClass="gw.plugin.ij.highlighter.GosuFileHighlighter"/>
+    <syntaxHighlighter key="Gosu Program" implementationClass="gw.plugin.ij.highlighter.GosuFileHighlighter"/>
+    <syntaxHighlighter key="Gosu Enhancement" implementationClass="gw.plugin.ij.highlighter.GosuFileHighlighter"/>
+    <syntaxHighlighter key="Vark Build Script" implementationClass="gw.plugin.ij.highlighter.GosuFileHighlighter"/>
+    <annotator language="Gosu" implementationClass="gw.plugin.ij.annotator.GosuSemanticAnnotator"/>
+
+    <stubElementTypeHolder class="gw.plugin.ij.lang.parser.GosuElementTypes"/>
+    <!--Stubs index-->
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuFullClassNameIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuFieldNameIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuMethodNameIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuAnnotatedMemberIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuClassNameIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuDirectInheritorsIndex"/>
+    <stubIndex implementation="gw.plugin.ij.lang.psi.stubs.index.GosuAnonymousClassIndex"/>
+
+    <!--find usages -->
+    <lang.findUsagesProvider language="Gosu" implementationClass="gw.plugin.ij.usages.GosuFindUsagesProvider"/>
+    <!--<findUsagesHandlerFactory implementation="org.jetbrains.plugins.groovy.findUsages.GroovyFindUsagesHandlerFactory"/>-->
+
+    <!--various -->
+    <lang.parserDefinition language="Gosu" implementationClass="gw.plugin.ij.lang.parser.GosuParserDefinition"/>
+    <!--<completion.contributor language="Gosu" implementationClass="gw.plugin.ij.completion.GosuCompletionContributor" id="gosuBasic"/>-->
+    <!--<completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaCompletionContributor" id="gosuBasic"/>-->
+
+    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaCompletionContributor" id="gosu_javaLegacy"
+                            order="last, before legacy, before default, before javaClassName"/>
+    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaClassReferenceCompletionContributor"
+                            id="gosu_javaClassReference"/>
+    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaMethodMergingContributor" id="gosu_methodMerger"
+                            order="before javaLegacy, before default"/>
+    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaMemberNameCompletionContributor" id="gosu_javaMemberName"
+                            order="before javaLegacy"/>
+    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaClassNameCompletionContributor" id="gosu_javaClassName"
+                            order="last, before default"/>
+    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaGlobalMemberNameCompletionContributor"
+                            id="gosu_javaGlobalMemberName" order="last, after javaClassName"/>
+    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaSmartCompletionContributor" id="gosu_javaSmart"
+                            order="last, before default"/>
+
+    <lang.foldingBuilder language="Gosu" implementationClass="gw.plugin.ij.folding.GosuFoldingBuilder"/>
+    <liveTemplateContext implementation="gw.plugin.ij.GosuTemplateContextType"/>
+
+    <sourceRootFinder implementation="gw.plugin.ij.GosuSourceRootFinder"/>
+    <externalAnnotator language="Gosu" implementationClass="gw.plugin.ij.lang.parser.GosuParserAnnotator"/>
+    <!--<annotator language="Gosu" implementationClass="gw.plugin.ij.lang.parser.GosuParserAnnotator"/>-->
+    <lang.commenter language="Gosu" implementationClass="gw.plugin.ij.commenting.GosuCommenter"/>
+    <lang.psiStructureViewFactory language="Gosu" implementationClass="gw.plugin.ij.structure.GosuStructureViewFactory"/>
+    <java.shortNamesCache implementation="gw.plugin.ij.lang.psi.stubs.GosuShortNamesCache"/>
+    <toolWindow id="Gosu Tester" icon="/gw/plugin/ij/FileProgram.png" anchor="bottom" factoryClass="gw.plugin.ij.tester.TesterFactory"/>
+    <typeHierarchyProvider language="Gosu" implementationClass="gw.plugin.ij.typehierarchy.GosuTypeHierarchyProvider"/>
+    <lang.formatter language="Gosu" implementationClass="gw.plugin.ij.formatting.TempGosuFormattingModelBuilder"/>
+
+<!-- language injection alternatives -->
+
+    <multiHostInjector id="Gosu MultiHostInjector" implementation="gw.plugin.ij.lang.inject.GosuLanguageInjector"/>
+
+<!--
+    <lang.parserDefinition language="PCF" implementationClass="gw.plugin.ij.pcf.PCFParserDefinition"/>
+    <lang.fileViewProviderFactory id="PCF View Provider" language="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/>
+    <fileType.fileViewProviderFactory id="PCF View Provider" filetype="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/>
+-->
+
+  </extensions>
+</idea-plugin>

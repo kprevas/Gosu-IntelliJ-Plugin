@@ -1,0 +1,3 @@
+[submodule "lib"]
+	path = lib
+	url = git@github.com:gosu-lang/Gosu-IntelliJ-Plugin-Libs.git
