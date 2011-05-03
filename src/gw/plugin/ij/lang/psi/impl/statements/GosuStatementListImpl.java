@@ -4,9 +4,11 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.Modifier;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassInitializer;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaToken;
 import com.intellij.psi.PsiLocalVariable;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiStatement;
@@ -166,4 +168,10 @@ public class GosuStatementListImpl extends GosuBaseStatementImpl<IStatementList>
   {
     return false;
   }
+
+  public boolean shouldChangeModificationCount(PsiElement place) {
+    PsiElement pparent = getParent();
+    return !(pparent instanceof PsiMethod || pparent instanceof PsiClassInitializer);
+  }
+  
 }
