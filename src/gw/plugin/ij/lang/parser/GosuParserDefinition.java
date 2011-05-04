@@ -84,6 +84,7 @@ public class GosuParserDefinition implements ParserDefinition
     {
       return new GosuProgramFileImpl( viewProvider );
     }
+
 //    if( strExt.endsWith( GosuEnhancementFileType.EXT ) )
 //    {
 //      return new GosuEnhancementFileImpl( viewProvider );
@@ -93,7 +94,8 @@ public class GosuParserDefinition implements ParserDefinition
 //      return new GosuTemplateFileImpl( viewProvider );
 //    }
 
-    throw new UnsupportedOperationException( "Don't now how to create file for " + strExt );
+    // default to class file impl for unrecognized extensions (e.g. language injection)
+    return new GosuClassFileImpl( viewProvider );
   }
 
   public ParserDefinition.SpaceRequirements spaceExistanceTypeBetweenTokens( ASTNode left, ASTNode right )

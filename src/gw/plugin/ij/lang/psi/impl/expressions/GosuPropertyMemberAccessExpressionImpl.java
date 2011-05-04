@@ -1,11 +1,7 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
-import gw.plugin.ij.lang.psi.api.GosuResolveResult;
-import com.intellij.psi.PsiCallExpression;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpressionList;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiReferenceParameterList;
 import com.intellij.psi.PsiType;
 import gw.lang.parser.expressions.IMemberAccessExpression;
 import gw.lang.reflect.IType;
@@ -67,7 +63,7 @@ public class GosuPropertyMemberAccessExpressionImpl extends GosuReferenceExpress
   }
 
   @NotNull
-  public PsiReferenceParameterList getTypeArgumentList()
+  public GosuTypeArgumentList getTypeArgumentList()
   {
     return null;
   }
@@ -76,12 +72,6 @@ public class GosuPropertyMemberAccessExpressionImpl extends GosuReferenceExpress
   public PsiType[] getTypeArguments()
   {
     return new PsiType[0];
-  }
-
-  @Override
-  public GosuTypeArgumentList getTypeArgumentListGosu()
-  {
-    return null;
   }
 
   @Override
@@ -94,18 +84,6 @@ public class GosuPropertyMemberAccessExpressionImpl extends GosuReferenceExpress
   public PsiExpressionList getArgumentList()
   {
     return null;
-  }
-
-  @Override
-  public PsiReferenceParameterList getParameterList()
-  {
-    return null;
-  }
-
-  @Override
-  public boolean isQualified()
-  {
-    return false;
   }
 
 //  @Override

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Copyright 2010 Guidewire Software, Inc.
  */
-public class GosuFormatingModelBuilder extends JavaFormattingModelBuilder
+public class GosuFormattingModelBuilder extends JavaFormattingModelBuilder
 {
   @NotNull
   public FormattingModel createModel( final PsiElement element, final CodeStyleSettings settings )

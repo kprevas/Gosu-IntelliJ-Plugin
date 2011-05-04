@@ -52,8 +52,12 @@ public class GosuStructureViewModel extends TextEditorBasedStructureViewModel {
 
   @NotNull
   public StructureViewTreeElement getRoot() {
-    return new JavaClassTreeElement(rootElement.getPsiClass(), false);
-
+    try {
+        return new JavaClassTreeElement(rootElement.getPsiClass(), false);
+    } catch(ClassCastException ex) {
+        ex.printStackTrace();
+        return null;
+    }
 //    return new GosuFileStructureViewElement(rootElement);
   }
 

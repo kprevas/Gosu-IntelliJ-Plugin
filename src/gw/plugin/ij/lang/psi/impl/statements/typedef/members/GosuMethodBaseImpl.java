@@ -86,7 +86,8 @@ public abstract class GosuMethodBaseImpl<T extends NamedStub> extends GosuDeclar
     return getNameIdentifierGosu().getTextRange().getStartOffset();
   }
 
-  @NotNull
+  // Can be null in error state
+  // @NotNull
   public PsiIdentifier getNameIdentifierGosu()
   {
     return (PsiIdentifier)findElement( this, GosuElementTypes.ELEM_TYPE_NameInDeclaration );

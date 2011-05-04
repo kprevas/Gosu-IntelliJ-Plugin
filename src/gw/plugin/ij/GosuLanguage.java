@@ -1,6 +1,5 @@
 package gw.plugin.ij;
 
-import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.InjectableLanguage;
 import com.intellij.lang.Language;
 
@@ -22,14 +21,14 @@ public class GosuLanguage extends Language implements InjectableLanguage
     super( "Gosu", "text/gosu", "text/x-gosu" );
   }
 
-  @Override
-  public Language getBaseLanguage()
-  {
-    //## todo: remove this method when we do our own code completion
-    // Trick intellij into thinking it can do code completion on Gosu code (see completion contributers in plugin.xml)
-    return JavaFileType.INSTANCE.getLanguage();
-  }
-
+//  @Override
+//  public Language getBaseLanguage()
+//  {
+//    //## todo: remove this method when we do our own code completion
+//    // Trick intellij into thinking it can do code completion on Gosu code (see completion contributers in plugin.xml)
+//    return JavaFileType.INSTANCE.getLanguage();
+//  }
+//
   @Override
   public String getDisplayName()
   {

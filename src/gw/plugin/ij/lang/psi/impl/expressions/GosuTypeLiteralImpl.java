@@ -6,6 +6,7 @@ import gw.lang.parser.IExpression;
 import gw.lang.parser.expressions.ITypeLiteralExpression;
 import gw.lang.reflect.IType;
 import gw.plugin.ij.lang.parser.GosuCompositeElement;
+import gw.plugin.ij.lang.parser.GosuUnhandledPsiElement;
 import gw.plugin.ij.lang.psi.GosuFile;
 import gw.plugin.ij.lang.psi.api.types.GosuCodeReferenceElement;
 import gw.plugin.ij.lang.psi.api.types.GosuTypeArgumentList;
@@ -104,6 +105,11 @@ public class GosuTypeLiteralImpl extends GosuReferenceExpressionImpl<ITypeLitera
     IExpression packageExpression = getParsedElement().getPackageExpression();
     if( packageExpression != null )
     {
+      // todo fill out ast
+      if(getFirstChild() instanceof GosuUnhandledPsiElement) {
+        System.err.println("ERROR: Package element AST is not complete, code completion not available yet.");
+        return null;
+      }
       return (GosuCodeReferenceElement)getFirstChild();
     }
     return null;
@@ -123,27 +129,18 @@ public class GosuTypeLiteralImpl extends GosuReferenceExpressionImpl<ITypeLitera
       PsiType[] psiTypes = new PsiType[type.getTypeParameters().length];
       for( IType typeParam : type.getTypeParameters() )
       {
-        TypesUtil.createType( typeParam.getGenericType().getName(), this );
+        if( typeParam.getGenericType() != null )
+        {
+          TypesUtil.createType( typeParam.getGenericType().getName(), this );
+        }
       }
     }
     return new PsiType[0];
   }
 
   @Override
-  public GosuTypeArgumentList getTypeArgumentListGosu()
+  public GosuTypeArgumentList getTypeArgumentList()
   {
     return findChildByClass( GosuTypeArgumentList.class );
-  }
-
-  @Override
-  public PsiReferenceParameterList getParameterList()
-  {
-    return null;
-  }
-
-  @Override
-  public boolean isQualified()
-  {
-    return getParent() instanceof GosuCodeReferenceElement;
   }
 }

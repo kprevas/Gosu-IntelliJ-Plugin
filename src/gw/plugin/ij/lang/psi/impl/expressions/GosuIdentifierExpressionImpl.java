@@ -1,7 +1,6 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReferenceParameterList;
 import com.intellij.psi.PsiType;
 import gw.lang.parser.IBlockClass;
 import gw.lang.parser.ICapturedSymbol;
@@ -76,8 +75,7 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
     return new PsiType[0];
   }
 
-  @Override
-  public GosuTypeArgumentList getTypeArgumentListGosu()
+  public GosuTypeArgumentList getTypeArgumentList()
   {
     return null;
   }
@@ -232,17 +230,5 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
       type = type.getGenericType();
     }
     return type == null ? null : IGosuClass.ProxyUtil.getProxiedType( type );
-  }
-
-  @Override
-  public PsiReferenceParameterList getParameterList()
-  {
-    return null;
-  }
-
-  @Override
-  public boolean isQualified()
-  {
-    return false;
   }
 }
