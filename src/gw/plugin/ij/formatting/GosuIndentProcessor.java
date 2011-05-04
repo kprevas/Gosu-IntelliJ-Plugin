@@ -5,6 +5,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.psi.tree.IElementType;
+import gw.plugin.ij.lang.GosuElementType;
 import gw.plugin.ij.lang.parser.GosuElementTypes;
 import gw.plugin.ij.lang.psi.GosuFileBase;
 import gw.plugin.ij.lang.psi.api.statements.typedef.GosuClassDefinition;
@@ -32,43 +33,31 @@ public abstract class GosuIndentProcessor extends GosuElementTypes
     ASTNode parentAstNode = parent.getNode();
     final PsiElement psiParent = parentAstNode.getPsi();
 
-    if (psiParent instanceof GosuFileBase ) {
-      return Indent.getNoneIndent();
-    }
-
     if( psiParent instanceof GosuClassDefinition )
     {
-      if( child.getElementType().equals( TT_class ) ||
-          child.getElementType().equals( TT_OP_brace_left ) ||
-          child.getElementType().equals( TT_OP_brace_right ) )
+      if( !isOneof(child, TT_class, TT_OP_brace_left, TT_OP_brace_right ) )
       {
-        return Indent.getNoneIndent();
+        return Indent.getNormalIndent();
       }
-      return Indent.getNormalIndent();
     }
 
     if( psiParent instanceof GosuMethod )
     {
-      if( child.getElementType().equals( TT_function ) ||
-          child.getElementType().equals( TT_OP_brace_left ) ||
-          child.getElementType().equals( TT_OP_brace_right ) )
+      if( !isOneof(child, TT_function, TT_OP_brace_left, TT_OP_brace_right ) )
       {
-        return Indent.getNoneIndent();
+        return Indent.getNormalIndent();
       }
-      return Indent.getNormalIndent();
     }
 
     if( psiParent instanceof GosuStatementListImpl )
     {
-      if( child.getElementType().equals( TT_OP_brace_left ) ||
-          child.getElementType().equals( TT_OP_brace_right ) )
+      if( !isOneof(child, TT_OP_brace_left, TT_OP_brace_right ) )
       {
-        return Indent.getNoneIndent();
+        return Indent.getNormalIndent();
       }
-      return Indent.getNormalIndent();
     }
 
-    return Indent.getContinuationWithoutFirstIndent();
+    return Indent.getNoneIndent();
   }
 
   /**
@@ -83,4 +72,16 @@ public abstract class GosuIndentProcessor extends GosuElementTypes
   }
 
 
+  public static boolean isOneof( ASTNode child, GosuElementType... types )
+  {
+    IElementType eltType = child.getElementType();
+    for( int i = 0; i < types.length; i++ )
+    {
+      if( eltType.equals( types[i] ) )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 }

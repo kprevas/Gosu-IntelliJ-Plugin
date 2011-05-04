@@ -1,14 +1,10 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReferenceParameterList;
 import com.intellij.psi.PsiType;
 import gw.lang.parser.IExpression;
 import gw.lang.parser.expressions.IMemberAccessExpression;
-import gw.lang.reflect.INamespaceType;
-import gw.lang.reflect.IPropertyInfo;
 import gw.lang.reflect.IType;
-import gw.lang.reflect.gs.IGosuVarPropertyInfo;
 import gw.plugin.ij.lang.GosuTokenTypes;
 import gw.plugin.ij.lang.parser.GosuCompositeElement;
 import gw.plugin.ij.lang.psi.api.types.GosuCodeReferenceElement;
@@ -75,7 +71,7 @@ public class GosuFieldMemberAccessExpressionImpl extends GosuReferenceExpression
   }
 
   @Override
-  public GosuTypeArgumentList getTypeArgumentListGosu()
+  public GosuTypeArgumentList getTypeArgumentList()
   {
     return null;
   }
@@ -87,17 +83,5 @@ public class GosuFieldMemberAccessExpressionImpl extends GosuReferenceExpression
     IType rootType = rootExpr.getType();
     rootType = rootType.isParameterizedType() ? rootType.getGenericType() : rootType;
     return resolveField( _strVarName, rootType.getName() );
-  }
-
-  @Override
-  public PsiReferenceParameterList getParameterList()
-  {
-    return null;
-  }
-
-  @Override
-  public boolean isQualified()
-  {
-    return getParent() instanceof GosuCodeReferenceElement;
   }
 }

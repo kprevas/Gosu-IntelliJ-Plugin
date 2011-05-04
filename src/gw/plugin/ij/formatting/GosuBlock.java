@@ -30,7 +30,11 @@ import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.tree.ILazyParseableElementType;
+import gw.lang.parser.IExpression;
+import gw.lang.parser.IParsedElement;
+import gw.lang.parser.IStatement;
 import gw.plugin.ij.lang.parser.GosuElementTypes;
+import gw.plugin.ij.lang.psi.impl.GosuBaseElementImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,13 +97,6 @@ public class GosuBlock extends GosuElementTypes implements Block
     return myAlignment;
   }
 
-  /**
-   * Returns spacing between neighrbour elements
-   *
-   * @param child1 left element
-   * @param child2 right element
-   * @return
-   */
   @Nullable
   public Spacing getSpacing(Block child1, Block child2) {
     return null;
@@ -107,39 +104,23 @@ public class GosuBlock extends GosuElementTypes implements Block
 
   @NotNull
   public ChildAttributes getChildAttributes(final int newChildIndex) {
-    return getAttributesByParent();
-  }
-
-  private ChildAttributes getAttributesByParent() {
     ASTNode astNode = getNode();
-//    final PsiElement psiParent = astNode.getPsi();
-//    if (psiParent instanceof GroovyFileBase) {
-//      return new ChildAttributes(Indent.getNoneIndent(), null);
-//    }
-//    if (BLOCK_SET.contains(astNode.getElementType()) ||
-//        SWITCH_STATEMENT.equals(astNode.getElementType())) {
-//      return new ChildAttributes(Indent.getNormalIndent(), null);
-//    }
-//    if (CASE_SECTION.equals(astNode.getElementType())) {
-//      return new ChildAttributes(Indent.getNormalIndent(), null);
-//    }
-//    if (psiParent instanceof GrBinaryExpression ||
-//        psiParent instanceof GrCommandArgumentList ||
-//        psiParent instanceof GrArgumentList) {
-//      return new ChildAttributes(Indent.getContinuationWithoutFirstIndent(), null);
-//    }
-//    if (psiParent instanceof GrParameterList) {
-//      return new ChildAttributes(this.getIndent(), this.getAlignment());
-//    }
-//    if (psiParent instanceof GrListOrMap) {
-//      return new ChildAttributes(Indent.getContinuationIndent(), null);
-//    }
-//    if (psiParent instanceof GrDocComment || psiParent instanceof GrDocTag) {
-//      return new ChildAttributes(Indent.getSpaceIndent(GroovyIndentProcessor.GDOC_COMMENT_INDENT), null);
-//    }
+    PsiElement psi = astNode.getPsi();
+    if( psi instanceof GosuBaseElementImpl )
+    {
+      GosuBaseElementImpl gpsi = (GosuBaseElementImpl)psi;
+      IParsedElement pe = gpsi.getParsedElement();
+      if( pe instanceof IStatement )
+      {
+        return new ChildAttributes( Indent.getNormalIndent(), null );
+      }
+      else if( pe instanceof IExpression )
+      {
+        return new ChildAttributes( Indent.getContinuationWithoutFirstIndent(), null );
+      }
+    }
     return new ChildAttributes(Indent.getNoneIndent(), null);
   }
-
 
   public boolean isIncomplete() {
     return isIncomplete(myNode);

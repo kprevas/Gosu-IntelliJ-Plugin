@@ -12,6 +12,7 @@ import gw.lang.reflect.INamespaceType;
 import gw.lang.reflect.IPropertyInfo;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuClass;
+import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IGosuVarPropertyInfo;
 import gw.lang.reflect.java.IJavaFieldPropertyInfo;
 import gw.lang.reflect.module.IModule;
@@ -57,7 +58,11 @@ public class GosuPsiCreator extends GosuElementTypes
     }
 
     IElementType elem = node.getElementType();
-    IGosuClass gsClass = node.getParsedElement().getGosuClass();
+    IGosuClass gsClass = null;
+    if( !node.getParsedElement().isSynthetic() )
+    {
+      gsClass = node.getParsedElement().getGosuClass();
+    }
     IModule mod;
     if( gsClass == null )
     {

@@ -144,7 +144,11 @@ public class GosuClassFileImpl extends GosuFileBaseImpl implements GosuFile
 
   public PsiClass getPsiClass()
   {
-    return getClasses()[0];
+    try {
+      return getClasses()[0];
+    } catch(IndexOutOfBoundsException ex) {
+      return null;
+    }
   }
 
   public String getTypeName()

@@ -102,7 +102,7 @@ public class GosuBlockGenerator extends GosuElementTypes
 //      ASTNode prevChildNode = null;
 //      final Alignment alignment = mustAlign(blockPsi, mySettings, children) ? Alignment.createAlignment() : null;
 //      for (ASTNode childNode : children) {
-//        if (canBeCorrectBlock(childNode)) {
+//        if (hasContent(childNode)) {
 //          final Indent indent = GroovyIndentProcessor.getChildIndent(block, prevChildNode, childNode);
 //          subBlocks.add(new GroovyBlock(childNode, isKeyword(childNode) ? null : alignment, indent, myWrap, mySettings));
 //          prevChildNode = childNode;
@@ -116,7 +116,7 @@ public class GosuBlockGenerator extends GosuElementTypes
     ASTNode[] children = node.getChildren( null );
     ASTNode prevChildNode = null;
     for (ASTNode childNode : children) {
-      if (canBeCorrectBlock(childNode)) {
+      if ( hasContent( childNode )) {
         final Indent indent = GosuIndentProcessor.getChildIndent(block, prevChildNode, childNode);
         subBlocks.add(new GosuBlock(childNode, blockPsi instanceof GosuStatementListImpl ? null : myAlignment, indent, myWrap, mySettings));
         prevChildNode = childNode;
@@ -125,14 +125,11 @@ public class GosuBlockGenerator extends GosuElementTypes
     return subBlocks;
   }
 
-
-
-
   /**
    * @param node Tree node
    * @return true, if the current node can be myBlock node, else otherwise
    */
-  private static boolean canBeCorrectBlock(final ASTNode node) {
+  private static boolean hasContent( final ASTNode node ) {
     return (node.getText().trim().length() > 0);
   }
 }

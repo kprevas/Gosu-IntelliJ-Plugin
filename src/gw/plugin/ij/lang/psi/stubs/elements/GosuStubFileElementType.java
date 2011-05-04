@@ -6,11 +6,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.StubBuilder;
 import com.intellij.psi.impl.source.tree.TreeElement;
 import com.intellij.psi.stubs.IndexSink;
@@ -56,7 +54,6 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- *
  * Copyright 2010 Guidewire Software, Inc.
  */
 public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
@@ -114,56 +111,78 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
     return parseAsType( chameleon, psiFile, module );
   }
 
-  private ASTNode parseAsInjectedExpression(ASTNode chameleon, GosuClassFileImpl psi, Module ijMod) {
-    IGosuParser parser = GosuParserFactory.createParser(TypeSystem.getCompiledGosuClassSymbolTable(), ScriptabilityModifiers.SCRIPTABLE);
-    parser.setThrowParseExceptionForWarnings(true);
-    parser.setDontOptimizeStatementLists(true);
-    parser.setWarnOnCaseIssue(true);
-    parser.setEditorParser(true);
+  private ASTNode parseAsInjectedExpression( ASTNode chameleon, GosuClassFileImpl psi, Module ijMod )
+  {
+    IGosuParser parser = GosuParserFactory.createParser( TypeSystem.getCompiledGosuClassSymbolTable(), ScriptabilityModifiers.SCRIPTABLE );
+    parser.setThrowParseExceptionForWarnings( true );
+    parser.setDontOptimizeStatementLists( true );
+    parser.setWarnOnCaseIssue( true );
+    parser.setEditorParser( true );
 
     final String fqn = "gw.lang.__Foo__";
-    final String fakeClassPrefix = "package gw.lang\nclass __Foo__ {\n  function __test__() {";
     final String optVarPrefix = "var __xx__=";
-    final String fakeClassSuffix = "\n  }\n}";
-    ExprType exprType = ExprType.METHOD;
+    final String fakeClassPlusFunctionPrefix = "package gw.lang\nclass __Foo__ {\n  function __test__() {";
+    final String fakeClassPlusFunctionSuffix = "\n  }\n}";
+    final String fakeClassPrefix = "package gw.lang\nclass __Foo__ {";
+    final String fakeClassSuffix = "\n}";
+    ExprType exprType = ExprType.METHOD_CALL;
     IGosuClass gsClass = null;
 
     IModule module = TypeSystem.getExecutionEnvironment().getModule( ijMod.getName() );
     TypeSystem.getExecutionEnvironment().pushModule( module );
 
-    String text = ((VirtualFileWindow) psi.getFileFromPsi()).getDocumentWindow().getText();
-    if(text == null || text.length() == 0) {
+    String text = ((VirtualFileWindow)psi.getFileFromPsi()).getDocumentWindow().getText();
+    if( text == null || text.length() == 0 )
+    {
       text = psi.getText();
     }
     assert text != null && text.length() > 0;
 
     int wsIndex = 0;
-    while(wsIndex < text.length() && Character.isWhitespace(text.charAt(wsIndex))) {
+    while( wsIndex < text.length() && Character.isWhitespace( text.charAt( wsIndex ) ) )
+    {
       ++wsIndex;
     }
-    String wsPrefix = wsIndex != 0 ? text.substring(0, wsIndex) : null;
+    String wsPrefix = wsIndex != 0 ? text.substring( 0, wsIndex ) : null;
     wsIndex = text.length() - 1;
-    while(wsIndex > 0 && Character.isWhitespace(text.charAt(wsIndex))) {
+    while( wsIndex > 0 && Character.isWhitespace( text.charAt( wsIndex ) ) )
+    {
       --wsIndex;
     }
-    String wsSuffix = wsIndex < text.length() - 1 ? text.substring(wsIndex + 1) : null;
+    String wsSuffix = wsIndex < text.length() - 1 ? text.substring( wsIndex + 1 ) : null;
 
     try
     {
-      exprType = computeExpressionType(text);
-      String fakeClassText = exprType == ExprType.VAR ? fakeClassPrefix + optVarPrefix + text + fakeClassSuffix :
-              fakeClassPrefix + text + fakeClassSuffix;
+      exprType = computeExpressionType( text );
+      String fakeClassText;
+      if( exprType == ExprType.VAR )
+      {
+        fakeClassText = fakeClassPlusFunctionPrefix + optVarPrefix + text + fakeClassPlusFunctionSuffix;
+      }
+      else if( exprType == ExprType.FUNCTION )
+      {
+        fakeClassText = fakeClassPrefix + text + fakeClassSuffix;
+      }
+      else
+      {
+        fakeClassText = fakeClassPlusFunctionPrefix + text + fakeClassPlusFunctionSuffix;
+      }
 
-      StringSourceFileHandle sourceFile = new StringSourceFileHandle(fqn, fakeClassText, null, false, ClassType.Class);
-      try {
+      StringSourceFileHandle sourceFile = new StringSourceFileHandle( fqn, fakeClassText, null, false, ClassType.Class );
+      try
+      {
 //        parser.setScript(text);
 //        parser.parseExp(new TypelessScriptPartId("scriptlet"));
-        gsClass = parser.parseClass(fqn, sourceFile, true, true);
-      } catch (ParseResultsException ex) {
-        IClassFileStatement classFileStmt = (IClassFileStatement) ex.getParsedElement();
+        gsClass = parser.parseClass( fqn, sourceFile, true, true );
+      }
+      catch( ParseResultsException ex )
+      {
+        IClassFileStatement classFileStmt = (IClassFileStatement)ex.getParsedElement();
         IClassStatement classStatement = classFileStmt.getClassStatement();
         gsClass = classStatement != null ? classStatement.getGosuClass() : null;
-      } catch(Throwable t) {
+      }
+      catch( Throwable t )
+      {
         t.printStackTrace();
       }
     }
@@ -171,80 +190,167 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
     {
       TypeSystem.getExecutionEnvironment().popModule( module );
     }
-    try {
-      ASTNode ast = GosuAstTransformer.instance().transform(chameleon, gsClass);
-      TreeElement trimmed = (TreeElement) trimToExpressionTree(ast, exprType);
+    try
+    {
+      ASTNode ast = GosuAstTransformer.instance().transform( chameleon, gsClass );
+      TreeElement trimmed = (TreeElement)trimToExpressionTree( ast, exprType );
 //    System.out.println("TRIMMED AST = '" + trimmed.getText() + "'");
-      if(wsSuffix != null) {
-        TreeElement wsSuffixNode = ASTFactory.leaf(GosuTokenTypes.TT_WHITESPACE, wsSuffix);
-        wsSuffixNode.setTreePrev(trimmed);
-        trimmed.setTreeNext(wsSuffixNode);
+      if( wsSuffix != null )
+      {
+        TreeElement wsSuffixNode = ASTFactory.leaf( GosuTokenTypes.TT_WHITESPACE, wsSuffix );
+        if( exprType == ExprType.FUNCTION )
+        {
+          TreeElement node = trimmed;
+          while( node.getTreeNext() != null )
+          {
+            node = node.getTreeNext();
+          }
+          if( node != null )
+          {
+            wsSuffixNode.setTreePrev( node );
+            node.setTreeNext( wsSuffixNode );
+          }
+        }
+        else
+        {
+          wsSuffixNode.setTreePrev( trimmed );
+          trimmed.setTreeNext( wsSuffixNode );
+        }
       }
-      if(wsPrefix != null) {
-        TreeElement wsPrefixNode = ASTFactory.leaf(GosuTokenTypes.TT_WHITESPACE, wsPrefix);
-        wsPrefixNode.setTreeNext(trimmed);
-        trimmed.setTreePrev(wsPrefixNode);
+      if( wsPrefix != null && !(trimmed instanceof PsiWhiteSpace) )
+      {
+        TreeElement wsPrefixNode = ASTFactory.leaf( GosuTokenTypes.TT_WHITESPACE, wsPrefix );
+        wsPrefixNode.setTreeNext( trimmed );
+        trimmed.setTreePrev( wsPrefixNode );
         trimmed = wsPrefixNode;
       }
       return trimmed;
-    } catch(Throwable t) {
+    }
+    catch( Throwable t )
+    {
       t.printStackTrace();
     }
     return null;
   }
 
-  private ASTNode trimToExpressionTree(ASTNode ast, ExprType exprType) {
+  private ASTNode trimToExpressionTree( ASTNode ast, ExprType exprType )
+  {
     ASTNode result = null;
-    try {
-      ASTNode varNode = findNodeByType(ast, exprType);
+    try
+    {
+      ASTNode exprNode = findNodeByType( ast, exprType );
       // handle VAR nodes correctly.
-//      result = varNode.getFirstChildNode().getTreeNext().getTreeNext().getTreeNext().getTreeNext();
-      result = varNode;
-      ((GosuCompositeElement) result).setTreeParent(null);
-      ((GosuCompositeElement) result).setTreePrev(null);
-      ((GosuCompositeElement) result).setTreeNext(null);
-    } catch (Throwable t) {
+      if( exprType == ExprType.VAR )
+      {
+        result = exprNode.getFirstChildNode().getTreeNext().getTreeNext().getTreeNext().getTreeNext();
+        ((GosuCompositeElement)result).setTreePrev( null );
+        for( TreeElement node = (TreeElement)result; node != null; node = node.getTreeNext() )
+        {
+          node.setTreeParent( null );
+        }
+      }
+      else if( exprType == ExprType.FUNCTION )
+      {
+        result = exprNode;
+        ASTNode tail = result;
+        while( tail != null && !tail.toString().equals( "PsiElement(})" ) )
+        {
+          tail = tail.getTreeNext();
+        }
+        if( tail != null )
+        {
+          tail = tail.getTreePrev();
+          if( tail instanceof PsiWhiteSpace )
+          {
+            tail = tail.getTreePrev();
+          }
+          ((TreeElement)tail).setTreeNext( null );
+        }
+        ((GosuCompositeElement)result).setTreePrev( null );
+        for( TreeElement node = (TreeElement)result; node != null; node = node.getTreeNext() )
+        {
+          node.setTreeParent( null );
+        }
+      }
+      else
+      {
+        result = exprNode;
+        ((GosuCompositeElement)result).setTreeNext( null );
+        ((GosuCompositeElement)result).setTreePrev( null );
+        ((GosuCompositeElement)result).setTreeParent( null );
+      }
+    }
+    catch( Throwable t )
+    {
       result = null;
       t.printStackTrace();
     }
     return result;
   }
 
-  private ASTNode findNodeByType(ASTNode ast, ExprType exprType) {
+  private ASTNode findNodeByType( ASTNode ast, ExprType exprType )
+  {
     ASTNode result = null;
-    for(ASTNode child = ast.getFirstChildNode(); result == null && child != null; child = child.getTreeNext()) {
-      if(child.toString().contains(exprType.getType())) {
+    for( ASTNode child = ast.getFirstChildNode(); result == null && child != null; child = child.getTreeNext() )
+    {
+      if( child.toString().contains( exprType.getType() ) )
+      {
         result = child;
-      } else if(child.getFirstChildNode() != null) {
-        result = findNodeByType(child, exprType);
+      }
+      else if( child.getFirstChildNode() != null )
+      {
+        result = findNodeByType( child, exprType );
       }
     }
     return result;
   }
 
-  public static enum ExprType {
+  public static enum ExprType
+  {
     VAR( "VarStatement" ),
     IF( "IfStatement" ),
     FOR( "ForStatement" ),
-    METHOD( "MethodCallStatement" );
+    FUNCTION( "(method definition)" ),
+    METHOD_CALL( "MethodCallStatement" );
 
     private String _type;
-    ExprType( String type ) { _type = type; }
-    public String getType() { return _type; }
+
+    ExprType( String type )
+    {
+      _type = type;
+    }
+
+    public String getType()
+    {
+      return _type;
+    }
   }
 
-  private static Pattern looksLikeMethodPattern = Pattern.compile("\\s*[a-zA-Z][a-zA-Z0-9_]*\\s*\\(");
-  private static Pattern looksLikeIfPattern = Pattern.compile("\\s*if*\\s*\\(");
-  private static Pattern looksLikeForPattern = Pattern.compile("\\s*for*\\s*\\(");
+  private static Pattern looksLikeMethodCallPattern = Pattern.compile( "\\s*[a-zA-Z][a-zA-Z0-9_]*\\s*\\(" );
+  private static Pattern looksLikeIfPattern = Pattern.compile( "\\s*if*\\s*\\(" );
+  private static Pattern looksLikeForPattern = Pattern.compile( "\\s*for*\\s*\\(" );
+  private static Pattern looksLikeFunctionPattern = Pattern.compile( "\\s*function\\s*[a-zA-Z][a-zA-Z0-9_]*\\(" );
 
-  private ExprType computeExpressionType(String text) {
-    if(looksLikeIfPattern.matcher(text).find()) {
+  private ExprType computeExpressionType( String text )
+  {
+    if( looksLikeFunctionPattern.matcher( text ).find() )
+    {
+      return ExprType.FUNCTION;
+    }
+    else if( looksLikeIfPattern.matcher( text ).find() )
+    {
       return ExprType.IF;
-    } else if(looksLikeForPattern.matcher(text).find()) {
+    }
+    else if( looksLikeForPattern.matcher( text ).find() )
+    {
       return ExprType.FOR;
-    } else if(looksLikeMethodPattern.matcher(text).find()) {
-      return ExprType.METHOD;
-    } else {
+    }
+    else if( looksLikeMethodCallPattern.matcher( text ).find() )
+    {
+      return ExprType.METHOD_CALL;
+    }
+    else
+    {
       return ExprType.VAR;
     }
   }
@@ -302,13 +408,6 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
 //    }
 //  }
 
-//  public GosuProgramFile createVirtualProgramFile( Project project, String strScript )
-//  {
-//    PsiFile fileFromText = PsiFileFactory.getInstance( project ).createFileFromText( "transient_program.gsp", GosuProgramFileType.instance(),
-//                                                                                     strScript, System.currentTimeMillis(), false );
-//    parseAsProgram(  )
-//  }
-
   private ASTNode parseAsClass( ASTNode chameleon, GosuClassFileImpl psiFile, IModule module )
   {
     String strClassName = psiFile.classNameFromFile();
@@ -336,7 +435,6 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
         try
         {
           gsClass = parser.parseClass( strClassName, new StringSourceFileHandle( strClassName, contents, false, ClassType.Class ), true, true );
-          TypeSystem.refresh( (ITypeRef)gsClass, true );
         }
         catch( ParseResultsException e )
         {
@@ -394,7 +492,6 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
         ParserOptions options = new ParserOptions().withParser( parser );
         IParseResult result = programParser.parseExpressionOrProgram( chameleon.getText(), parser.getSymbolTable(), options );
         gsProgram = result.getProgram();
-        TypeSystem.refresh( (ITypeRef)gsProgram, true );
       }
       catch( ParseResultsException ex )
       {
@@ -423,7 +520,10 @@ public class GosuStubFileElementType extends IStubFileElementType<GosuFileStub>
       VirtualFile vfile = psi.getFileFromPsi();
 //      System.out.println("vfile for psi " + psi.getClass().getSimpleName() + psi.hashCode() + " is " +
 //              vfile.getClass().getSimpleName() + vfile.hashCode());
-      mod = ModuleUtil.findModuleForFile( vfile, psi.getProject() );
+      if( vfile != null )
+      {
+        mod = ModuleUtil.findModuleForFile( vfile, psi.getProject() );
+      }
     }
     if( mod == null )
     {

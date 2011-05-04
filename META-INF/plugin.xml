@@ -95,26 +95,14 @@
 
     <!--various -->
     <lang.parserDefinition language="Gosu" implementationClass="gw.plugin.ij.lang.parser.GosuParserDefinition"/>
-    <!--<completion.contributor language="Gosu" implementationClass="gw.plugin.ij.completion.GosuCompletionContributor" id="gosuBasic"/>-->
-    <!--<completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaCompletionContributor" id="gosuBasic"/>-->
-
-    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaCompletionContributor" id="gosu_javaLegacy"
-                            order="last, before legacy, before default, before javaClassName"/>
-    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaClassReferenceCompletionContributor"
-                            id="gosu_javaClassReference"/>
-    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaMethodMergingContributor" id="gosu_methodMerger"
-                            order="before javaLegacy, before default"/>
-    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaMemberNameCompletionContributor" id="gosu_javaMemberName"
-                            order="before javaLegacy"/>
-    <completion.contributor language="any" implementationClass="com.intellij.codeInsight.completion.JavaClassNameCompletionContributor" id="gosu_javaClassName"
-                            order="last, before default"/>
-    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaGlobalMemberNameCompletionContributor"
-                            id="gosu_javaGlobalMemberName" order="last, after javaClassName"/>
-    <completion.contributor language="Gosu" implementationClass="com.intellij.codeInsight.completion.JavaSmartCompletionContributor" id="gosu_javaSmart"
-                            order="last, before default"/>
+    <completion.contributor language="Gosu" implementationClass="gw.plugin.ij.completion.GosuCompletionContributor" id="gosuBasic"/>
 
     <lang.foldingBuilder language="Gosu" implementationClass="gw.plugin.ij.folding.GosuFoldingBuilder"/>
-    <liveTemplateContext implementation="gw.plugin.ij.GosuTemplateContextType"/>
+    <liveTemplateContext implementation="gw.plugin.ij.GosuClassLiveTemplateContextType"/>
+    <liveTemplateContext implementation="gw.plugin.ij.GosuProgramLiveTemplateContextType"/>
+<!--
+    <lang.documentationProvider language="Gosu" implementationClass="gw.plugin.ij.doc.GosuDocumentationProvider"/>
+-->
 
     <sourceRootFinder implementation="gw.plugin.ij.GosuSourceRootFinder"/>
     <externalAnnotator language="Gosu" implementationClass="gw.plugin.ij.lang.parser.GosuParserAnnotator"/>
@@ -124,17 +112,19 @@
     <java.shortNamesCache implementation="gw.plugin.ij.lang.psi.stubs.GosuShortNamesCache"/>
     <toolWindow id="Gosu Tester" icon="/gw/plugin/ij/FileProgram.png" anchor="bottom" factoryClass="gw.plugin.ij.tester.TesterFactory"/>
     <typeHierarchyProvider language="Gosu" implementationClass="gw.plugin.ij.typehierarchy.GosuTypeHierarchyProvider"/>
-    <lang.formatter language="Gosu" implementationClass="gw.plugin.ij.formatting.TempGosuFormattingModelBuilder"/>
+    <lang.formatter language="Gosu" implementationClass="gw.plugin.ij.formatting.GosuFormattingModelBuilder"/>
 
 <!-- language injection alternatives -->
 
+    <!-- choice A (doesn't support structure view -->
     <multiHostInjector id="Gosu MultiHostInjector" implementation="gw.plugin.ij.lang.inject.GosuLanguageInjector"/>
 
-<!--
-    <lang.parserDefinition language="PCF" implementationClass="gw.plugin.ij.pcf.PCFParserDefinition"/>
+    <!-- choice B (half baked, more complicated, supports structure view) -->
+<!--    <lang.parserDefinition language="PCF" implementationClass="gw.plugin.ij.pcf.PCFParserDefinition"/>
     <lang.fileViewProviderFactory id="PCF View Provider" language="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/>
-    <fileType.fileViewProviderFactory id="PCF View Provider" filetype="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/>
--->
+    <fileType.fileViewProviderFactory id="PCF View Provider" filetype="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/> -->
+
+<!-- end language injection -->
 
   </extensions>
 </idea-plugin>
