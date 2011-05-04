@@ -121,11 +121,13 @@ public class ModuleClassLoaderSupport {
     Set<File> jrePaths = new HashSet<File>();
     ModuleRootManager rootManager = ModuleRootManager.getInstance(ijModule);
     Sdk sdk = rootManager.getSdk();
-    VirtualFile[] jarFiles = ((ProjectJdkImpl) sdk).getRoots(OrderRootType.CLASSES);
+    if (sdk != null) {
+      VirtualFile[] jarFiles = ((ProjectJdkImpl) sdk).getRoots(OrderRootType.CLASSES);
 
-    for (VirtualFile jarFile : jarFiles) {
-      String path = stripExtraCharacters(jarFile.getPath());
-      jrePaths.add(new File(path));
+      for (VirtualFile jarFile : jarFiles) {
+        String path = stripExtraCharacters(jarFile.getPath());
+        jrePaths.add(new File(path));
+      }
     }
 
     return jrePaths;
