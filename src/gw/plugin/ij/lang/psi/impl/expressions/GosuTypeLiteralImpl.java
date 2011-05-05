@@ -1,16 +1,22 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.TreeElement;
 import com.intellij.util.IncorrectOperationException;
 import gw.lang.parser.IExpression;
 import gw.lang.parser.expressions.ITypeLiteralExpression;
 import gw.lang.reflect.IType;
 import gw.plugin.ij.lang.parser.GosuCompositeElement;
+import gw.plugin.ij.lang.parser.GosuElementTypes;
 import gw.plugin.ij.lang.parser.GosuUnhandledPsiElement;
 import gw.plugin.ij.lang.psi.GosuFile;
+import gw.plugin.ij.lang.psi.api.statements.typedef.GosuClassDefinition;
 import gw.plugin.ij.lang.psi.api.types.GosuCodeReferenceElement;
 import gw.plugin.ij.lang.psi.api.types.GosuTypeArgumentList;
 import gw.plugin.ij.lang.psi.api.types.GosuTypeElement;
+import gw.plugin.ij.lang.psi.impl.GosuProgramFileImpl;
+import gw.plugin.ij.lang.psi.impl.statements.typedef.GosuClassDefinitionImpl;
 import gw.plugin.ij.lang.psi.util.GosuPsiParseUtil;
 import gw.plugin.ij.lang.psi.util.TypesUtil;
 
@@ -69,28 +75,31 @@ public class GosuTypeLiteralImpl extends GosuReferenceExpressionImpl<ITypeLitera
 
   public PsiElement bindToElement( PsiElement element ) throws IncorrectOperationException
   {
-//    Module ijModule = ModuleUtil.findModuleForPsiElement(element);
-//    IExecutionEnvironment env = TypeSystem.getExecutionEnvironment();
-//    IModule module = env.getModule(ijModule.getName());
-//    ASTNode astNode = GosuStubFileElementType.parseAsType(element.getParent().getNode(), (GosuFileImpl) element.getParent(), module);
-//    ASTNode newAST = astNode.getTreeParent().getChildren(null)[2].getChildren(null)[6].getChildren(null)[5];
-//
-//    getNode().getTreeParent().replaceChildInternal(this.getNode(), (TreeElement)newAST);
-
-    if( element instanceof PsiQualifiedNamedElement )
-    {
-      PsiElement elt = GosuPsiParseUtil.parseExpression( ((PsiQualifiedNamedElement)element).getQualifiedName(), getManager() );
-      if( elt instanceof GosuTypeLiteralImpl )
-      {
-        GosuTypeLiteralImpl tl = (GosuTypeLiteralImpl)elt;
-        GosuFile file = (GosuFile)getContainingFile();
-        file.addImport(tl);
-        GosuCompositeElement<ITypeLiteralExpression> ast = tl.getNode();
-        ast.removeRange(ast.getFirstChildNode(), ast.getLastChildNode());
-        replace( tl );
-        return tl;
-      }
+    String text = this.getText();
+    if (text.contains(".")) {
+      text = ((GosuClassDefinition) element).getQualifiedName();
+    } else {
+      text = ((GosuClassDefinition) element).getName();
     }
+    GosuProgramFileImpl psiFile = GosuPsiParseUtil.createVirtualProgramFile(this, "null typeis " + text);
+    ASTNode returnAST = psiFile.getNode().findChildByType(GosuElementTypes.ELEM_TYPE_ReturnStatement);
+    ASTNode newNode = returnAST.getPsi().getChildren()[0].getChildren()[0].getChildren()[1].getNode();
+    getNode().getTreeParent().replaceChildInternal(this.getNode(), (TreeElement)newNode);
+
+//    if( element instanceof PsiQualifiedNamedElement )
+//    {
+//      PsiElement elt = GosuPsiParseUtil.parseExpression( ((PsiQualifiedNamedElement)element).getQualifiedName(), getManager() );
+//      if( elt instanceof GosuTypeLiteralImpl )
+//      {
+//        GosuTypeLiteralImpl tl = (GosuTypeLiteralImpl)elt;
+//        GosuFile file = (GosuFile)getContainingFile();
+//        file.addImport(tl);
+//        GosuCompositeElement<ITypeLiteralExpression> ast = tl.getNode();
+//        ast.removeRange(ast.getFirstChildNode(), ast.getLastChildNode());
+//        replace( tl );
+//        return tl;
+//      }
+//    }
     return this;
   }
 
