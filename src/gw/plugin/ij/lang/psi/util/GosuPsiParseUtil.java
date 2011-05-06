@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.util.IncorrectOperationException;
 import gw.lang.reflect.TypeSystem;
 import gw.plugin.ij.GosuProgramFileType;
 import gw.plugin.ij.lang.GosuElementType;
@@ -13,6 +14,7 @@ import gw.plugin.ij.lang.psi.IGosuPsiElement;
 import gw.plugin.ij.lang.psi.impl.GosuClassFileImpl;
 import gw.plugin.ij.lang.psi.impl.GosuProgramFileImpl;
 import gw.plugin.ij.lang.psi.impl.GosuPsiElementImpl;
+import gw.plugin.ij.lang.psi.impl.expressions.GosuReferenceExpressionImpl;
 import gw.plugin.ij.lang.psi.impl.expressions.GosuTypeLiteralImpl;
 import gw.plugin.ij.lang.psi.impl.statements.GosuUsesStatementImpl;
 import gw.plugin.ij.lang.psi.impl.statements.GosuUsesStatementListImpl;
@@ -37,7 +39,6 @@ public class GosuPsiParseUtil
       strScript = text + "\n" + strScript;
     }
 
-    //TODO add the appropriate imports
     PsiFileFactory factory = PsiFileFactory.getInstance(psi.getProject());
     return (GosuProgramFileImpl) factory.createFileFromText("transient_program.gsp", GosuProgramFileType.instance(),
         strScript, System.currentTimeMillis(), false);
@@ -60,4 +61,11 @@ public class GosuPsiParseUtil
     //Ummmm, there has to be a better way to do this...
     return children[0].getChildren()[0];
   }
+
+  public static PsiElement createReferenceNameFromText(GosuReferenceExpressionImpl referenceExpression, String refName) {
+    GosuProgramFileImpl file = createVirtualProgramFile(referenceExpression, "return " + refName);
+    PsiElement element = file.getChildren()[3].getChildren()[0].getFirstChild();
+    return element;
+  }
+
 }

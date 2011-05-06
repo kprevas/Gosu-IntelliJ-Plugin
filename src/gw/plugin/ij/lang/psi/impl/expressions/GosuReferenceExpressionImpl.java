@@ -1,5 +1,6 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiCallExpression;
@@ -16,6 +17,7 @@ import gw.plugin.ij.lang.psi.api.GosuResolveResult;
 import gw.plugin.ij.lang.psi.api.expressions.IGosuReferenceExpression;
 import gw.plugin.ij.lang.psi.impl.GosuPsiElementImpl;
 import gw.plugin.ij.lang.psi.impl.GosuResolveResultImpl;
+import gw.plugin.ij.lang.psi.util.GosuPsiParseUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -128,16 +130,14 @@ public abstract class GosuReferenceExpressionImpl<T extends IParsedElement> exte
 
   protected PsiElement handleElementRenameInner( String newElementName ) throws IncorrectOperationException
   {
-    //## todo:  this will be nice
-
-//    PsiElement nameElement = getReferenceNameElement();
-//    if( nameElement != null )
-//    {
-//      ASTNode node = nameElement.getNode();
-//      ASTNode newNameNode = GosuPsiElementFactory.getInstance( getProject() ).createReferenceNameFromText( newElementName ).getNode();
-//      assert newNameNode != null && node != null;
-//      node.getTreeParent().replaceChild( node, newNameNode );
-//    }
+    PsiElement nameElement = getReferenceNameElement();
+    if( nameElement != null )
+    {
+      ASTNode node = nameElement.getNode();
+      ASTNode newNameNode = GosuPsiParseUtil.createReferenceNameFromText(this, newElementName ).getNode();
+      assert newNameNode != null && node != null;
+      node.getTreeParent().replaceChild( node, newNameNode );
+    }
 
     return this;
   }

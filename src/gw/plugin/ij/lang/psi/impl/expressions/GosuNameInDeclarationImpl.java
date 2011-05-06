@@ -25,7 +25,7 @@ public class GosuNameInDeclarationImpl extends GosuPsiElementImpl<INameInDeclara
 
   public String getName()
   {
-    return getParsedElement().getName();
+    return getFirstChild() == null ? "" : getFirstChild().getText();
   }
 
   @Override

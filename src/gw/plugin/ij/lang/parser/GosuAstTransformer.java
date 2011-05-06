@@ -13,6 +13,7 @@ import gw.lang.parser.IProgramClassFunctionSymbol;
 import gw.lang.parser.ISourceCodeTokenizer;
 import gw.lang.parser.IStatement;
 import gw.lang.parser.IToken;
+import gw.lang.parser.Keyword;
 import gw.lang.parser.expressions.*;
 import gw.lang.parser.statements.IArrayAssignmentStatement;
 import gw.lang.parser.statements.IAssignmentStatement;
@@ -23,6 +24,7 @@ import gw.lang.parser.statements.IClassDeclaration;
 import gw.lang.parser.statements.IClassFileStatement;
 import gw.lang.parser.statements.IClassStatement;
 import gw.lang.parser.statements.IClasspathStatement;
+import gw.lang.parser.statements.IConstructorStatement;
 import gw.lang.parser.statements.IContinueStatement;
 import gw.lang.parser.statements.IDoWhileStatement;
 import gw.lang.parser.statements.IEvalStatement;
@@ -311,7 +313,18 @@ public class GosuAstTransformer
     }
     else if( pe instanceof INameInDeclaration )
     {
-      node = new GosuCompositeElement<INameInDeclaration>( GosuElementTypes.ELEM_TYPE_NameInDeclaration, (INameInDeclaration)pe );
+      String strName = ((INameInDeclaration)pe).getName();
+      if( strName == null || strName.length() == 0 ||
+          (pe.getTokens().size() == 1 && pe.getTokens().get( 0 ).getType() != ISourceCodeTokenizer.TT_WORD) ||
+          pe.getParent() instanceof IConstructorStatement )
+      {
+        node = new GosuCompositeElement<INameInDeclaration>( GosuElementTypes.ELEM_TYPE_NameInDeclaration, (INameInDeclaration)pe );
+      }
+      else
+      {
+        // Skip over the NameInDeclaration and use the Identifier token directly (structurally easier to use with IJ if PsiIdentifier's parent is the Var or Method declaration)
+        node = null;
+      }
     }
     else if( pe instanceof IStatementList )
     {

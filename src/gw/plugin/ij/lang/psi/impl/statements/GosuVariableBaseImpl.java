@@ -134,13 +134,25 @@ public abstract class GosuVariableBaseImpl<E extends IParsedElementWithAtLeastOn
   @NotNull
   public PsiIdentifier getNameIdentifierGosu()
   {
-    return (PsiIdentifier)findElement( this, GosuElementTypes.ELEM_TYPE_NameInDeclaration );
+    //return (PsiIdentifier)findElement( this, GosuElementTypes.ELEM_TYPE_NameInDeclaration );
+    PsiIdentifier id = findChildByClass( PsiIdentifier.class );
+    if( id.getFirstChild() != null && id.getFirstChild() instanceof PsiIdentifier )
+    {
+      // Always return the leaf token node; we always want to patch in just the name and not mess with upper-level tree nodes
+      id = (PsiIdentifier)id.getFirstChild();
+    }
+    return id;
   }
 
   @Nullable
   public IGosuExpression getInitializerGosu()
   {
-    return findChildByClass( IGosuExpression.class );
+    IGosuExpression[] childrenByClass = findChildrenByClass( IGosuExpression.class );
+    if( childrenByClass.length != 0 )
+    {
+      return childrenByClass[childrenByClass.length-1];
+    }
+    return null;
   }
 
   public int getTextOffset()
@@ -150,7 +162,8 @@ public abstract class GosuVariableBaseImpl<E extends IParsedElementWithAtLeastOn
 
   public PsiElement setName( @NonNls @NotNull String name ) throws IncorrectOperationException
   {
-    throw new UnsupportedOperationException( "Men at work" );
+    com.intellij.psi.impl.PsiImplUtil.setName(getNameIdentifierGosu(), name);
+    return this;
   }
 
   @NotNull

@@ -123,6 +123,8 @@
 
     <lang.fileViewProviderFactory language="Gosu" implementationClass="gw.plugin.ij.view.GosuFileViewProviderFactory"/>
 
+    <directClassInheritorsSearch implementation="gw.plugin.ij.lang.psi.impl.GosuDirectInheritorSearcher"/>
+
     <!-- choice B (half baked, more complicated, supports structure view) -->
 <!--    <lang.parserDefinition language="PCF" implementationClass="gw.plugin.ij.pcf.PCFParserDefinition"/>
     <lang.fileViewProviderFactory id="PCF View Provider" language="PCF" implementationClass="gw.plugin.ij.pcf.view.PCFFileViewProviderFactory"/>
