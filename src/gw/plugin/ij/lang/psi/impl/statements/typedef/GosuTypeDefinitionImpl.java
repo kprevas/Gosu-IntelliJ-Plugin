@@ -100,27 +100,28 @@ public abstract class GosuTypeDefinitionImpl extends GosuDeclaredElementImpl<ICl
   @Nullable
   public String getQualifiedName()
   {
-    return ((IClassStatement)((GosuCompositeElement)getNode()).getParsedElement()).getGosuClass().getName();
-//    final GosuTypeDefinitionStub stub = getStub();
-//    if( stub != null )
-//    {
-//      return stub.getQualifiedName();
-//    }
-//
-//    PsiElement parent = getParent();
-//    if( parent instanceof GosuFile )
-//    {
-//      String packageName = ((GosuFile)parent).getPackageName();
-//      return packageName.length() > 0 ? packageName + "." + getName() : getName();
-//    }
-//
-//    final PsiClass containingClass = getContainingClass();
-//    if( containingClass != null )
-//    {
-//      return containingClass.getQualifiedName() + "." + getName();
-//    }
-//
-//    return null;
+//    return ((IClassStatement)((GosuCompositeElement)getNode()).getParsedElement()).getGosuClass().getName();
+
+    GosuTypeDefinitionStub stub = getStub();
+    if( stub != null )
+    {
+      return stub.getQualifiedName();
+    }
+
+    PsiElement parent = getParent();
+    if( parent instanceof GosuFile )
+    {
+      String packageName = ((GosuFile)parent).getPackageName();
+      return packageName.length() > 0 ? packageName + "." + getName() : getName();
+    }
+
+    final PsiClass containingClass = getContainingClass();
+    if( containingClass != null )
+    {
+      return containingClass.getQualifiedName() + "." + getName();
+    }
+
+    return null;
   }
 
   @NotNull

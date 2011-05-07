@@ -28,6 +28,9 @@ public abstract class GosuFileBaseImpl extends PsiFileBase implements GosuFileBa
   protected GosuFileBaseImpl( FileViewProvider viewProvider, @NotNull Language language )
   {
     super( viewProvider, language );
+
+    // Experimental: Use this for skipping incremental parse (currently does not work). See also GosuFileViewProvider.supportsIncrementalReparse()
+    // putUserData( BlockSupport.DO_NOT_REPARSE_INCREMENTALLY, true );
   }
 
   public GosuFileBaseImpl( IFileElementType root, IFileElementType root1, FileViewProvider provider )

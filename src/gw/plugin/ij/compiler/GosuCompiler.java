@@ -17,6 +17,7 @@ import gw.lang.parser.exceptions.ParseException;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.parser.expressions.ITypeLiteralExpression;
 import gw.lang.parser.resources.Res;
+import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeRef;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.*;
@@ -357,8 +358,9 @@ public class GosuCompiler implements TranslatingCompiler {
 
   private boolean shouldReportErrors(IGosuClass gsClass) {
     IGosuClassTypeInfo typeInfo = gsClass.getTypeInfo();
-    return !typeInfo.hasAnnotation(TypeSystem.getByFullName("gw.testharness.DoNotVerifyResource")) &&
-           !typeInfo.hasAnnotation(TypeSystem.getByFullName("gw.lang.DoNotParseInIDE"));
+    IType dnvr = TypeSystem.getByFullNameIfValid( "gw.testharness.DoNotVerifyResource" );
+    IType dnpiide = TypeSystem.getByFullNameIfValid( "gw.lang.DoNotParseInIDE" );
+    return (dnvr == null || !typeInfo.hasAnnotation( dnvr )) && (dnpiide == null || !typeInfo.hasAnnotation( dnpiide ));
   }
 
   public static boolean shouldIgnore(String name) {

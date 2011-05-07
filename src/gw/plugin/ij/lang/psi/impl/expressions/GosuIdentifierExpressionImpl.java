@@ -1,6 +1,7 @@
 package gw.plugin.ij.lang.psi.impl.expressions;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiType;
 import gw.lang.parser.IBlockClass;
 import gw.lang.parser.ICapturedSymbol;
@@ -22,7 +23,6 @@ import gw.plugin.ij.lang.psi.util.TypesUtil;
 
 
 /**
- *
  * Copyright 2010 Guidewire Software, Inc.
  */
 public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<IIdentifierExpression> implements GosuCodeReferenceElement, GosuTypeElement
@@ -34,7 +34,18 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
 
   public PsiElement getReferenceNameElement()
   {
-    return getFirstChild();
+    // Return the psi identifier *token*
+
+    PsiElement child = this;
+    while( child.getFirstChild() != null )
+    {
+      child = child.getFirstChild();
+    }
+    if( !(child instanceof PsiIdentifier) )
+    {
+      throw new IllegalStateException( "Expected PsiIdentifier, but found: " + child.getClass().getSimpleName() );
+    }
+    return child;
   }
 
   @Override
@@ -114,7 +125,7 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
   {
     IType type = symbol.getType();
     Class symClass = symbol.getClass();
-    if( gsClass.getExternalSymbol( symbol.getName() ) != null )
+    if( gsClass.getExternalSymbol( getReferenceName() ) != null )
     {
       // Currently we do not attempt to link to decl source of external symbols
 
@@ -129,23 +140,23 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
         if( isMemberOnEnclosingType( symbol, gsClass ) )
         {
           // Instance field from 'outer'
-          return resolveField( symbol.getName(), (IGosuClass)symbol.getGosuClass().getEnclosingType() );
+          return resolveField( getReferenceName(), (IGosuClass)symbol.getGosuClass().getEnclosingType() );
         }
         else
         {
           // Instance field from 'this'
-          return resolveField( symbol.getName(), symbol.getGosuClass() );
+          return resolveField( getReferenceName(), symbol.getGosuClass() );
         }
       }
       else
       {
         // Static field
-        return resolveField( symbol.getName(), symbol.getGosuClass() );
+        return resolveField( getReferenceName(), symbol.getGosuClass() );
       }
     }
     else if( ICapturedSymbol.class.isAssignableFrom( symClass ) )
     {
-      return resolveCapture( symbol.getName(), gsClass );
+      return resolveCapture( getReferenceName(), gsClass );
     }
     else if( symbol.getIndex() >= 0 )
     {
@@ -155,12 +166,12 @@ public class GosuIdentifierExpressionImpl extends GosuReferenceExpressionImpl<II
       {
         // Local var is captured in an anonymous inner class.
         // Symbol's value maintained as a one elem array of symbol's type.
-        return resolveCapture( symbol.getName(), gsClass );
+        return resolveCapture( getReferenceName(), gsClass );
       }
       else
       {
         // Simple local var
-        return resloveLocal( symbol.getName() );
+        return resloveLocal( getReferenceName() );
       }
     }
     else if( IDynamicPropertySymbol.class.isAssignableFrom( symClass ) )
